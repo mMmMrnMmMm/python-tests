@@ -7,7 +7,11 @@ Created on Sun Mar 11 14:23:36 2018
 MAXDAYS = 73000
 LOG = []
 PEOPLE = []
+MARRIAGES = []
 DAY = 0 
+DATINGPOOL = []
+RULER  = None
+HEIR = None
 import random
 malnames = ["Joshua", "Carl", "Peter", "Alexander", "Scott", "Henry", "Aaron",#7
             "Isaac", "Liam", "Mark", "Michael", "Elijah", "Achilles", #13
@@ -37,19 +41,28 @@ class person:
         self.marriage = None
         LOG.append(self.firstname + " "+self.lastname + " was born in the "+ 
                    "year of " + str(DAY//365))
-        PEOPLE.append(self)
+        if self not in PEOPLE:
+            PEOPLE.append(self)
         self.age = 0
         self.deathchance = 0
+        self.dating = False
+        self.name = (self.firstname+ " " + self.lastname)
     def death(self):
         if not self.marriage == None:
             marriage.partners.remove(self) #No longer married
         PEOPLE.remove(self) #No longer living
         LOG.append(self.firstname + " "+self.lastname + " died in the year of "
                    + str(DAY//365)+ ", at the age of "+str(self.age//365))
+        global RULER
+        global HEIR
+        if self == RULER:
+            RULER = HEIR
+            HEIR = None
         
     
 
 class marriage:
+    RULER
     def __init__(self, p1, p2):
         """
         The last name of all children and all partners is the last name of 
@@ -63,22 +76,51 @@ class marriage:
         self.children = []
         self.nchildren = 0
         self.partners = (p1,p2)
-    def addchild(self, child):
+        LOG.append("in the year of "+ str(DAY//365) + " "+ p1.name +
+                   " married " + p2.name)
+    def addchild(self):
+        global HEIR
+        child = person()
         self.children.append(child)
         self.nchildren += 1
-        
-tick =1 
+        if RULER in self.partners and HEIR != None:
+            HEIR = child
+    
+    
+def matchmaking(): #code for handling and marrying people in the dating pool
+    if len(DATINGPOOL) > 2:
+        mpool = []
+        fpool = []
+        for per in DATINGPOOL: #splitting the pool into males and females
+            if per.gender == "male":
+                mpool.append(per)
+            else:
+                fpool.append(per)
+        if len(fpool) != 0 and len(mpool) != 0:
+            if RULER in DATINGPOOL:
+                if RULER.gender == "male":
+                    MARRIAGES.append(marriage(RULER, random.choice(fpool)))
+                else:
+                    MARRIAGES.append(marriage(RULER, random.choice(mpool)))
    
-PEOPLE.append(person())    
+
+RULER = person()  
 for DAY in range(MAXDAYS):
-    if len(PEOPLE) < 4:
+    if len(PEOPLE) < 4: #creating more people should the supply ever fail
         for i in range(random.randint(4,10)):
             PEOPLE.append(person())
     for per in PEOPLE:
-        per.age += 1
-        if DAY%365 == 0:
+        per.age += 1 #everyone gets older
+        if DAY%365 == 0: #once per year checks
             if random.randint(1,100) < (8/400000000)*(((per.age//365)-30)**6):
                 per.death()
+            if (per.marriage == None and per.age//365 > 18 and per.dating == 
+                False):
+                per.dating = True
+                DATINGPOOL.append(per)
+            matchmaking()
+
+            
 
 for elem in LOG:
     print(elem)
