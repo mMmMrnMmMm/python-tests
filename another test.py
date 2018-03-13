@@ -7,8 +7,7 @@ Created on Sun Mar 11 14:23:36 2018
 MAXDAYS = 73000
 LOG = []
 PEOPLE = []
-DAY = 0
-deaths = []
+DAY = 0 
 import random
 malnames = ["Joshua", "Carl", "Peter", "Alexander", "Scott", "Henry", "Aaron",#7
             "Isaac", "Liam", "Mark", "Michael", "Elijah", "Achilles", #13
@@ -78,10 +77,8 @@ for DAY in range(MAXDAYS):
     for per in PEOPLE:
         per.age += 1
         if DAY%365 == 0:
-            if random.randint(1,100) < (8/400000000)*(((per.age//365)-20)**8):
+            if random.randint(1,100) < (8/400000000)*(((per.age//365)-30)**6):
                 per.death()
-
-    
 
 for elem in LOG:
     print(elem)
